@@ -1,0 +1,21 @@
+# Render Blueprint — Discord MCP (prod)
+# Docs: https://render.com/docs/blueprint-spec
+services:
+  - type: web
+    name: discord-mcp-prod
+    runtime: docker
+    plan: free
+    region: oregon
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /actuator/health
+    autoDeploy: true
+    envVars:
+      # Switch the Spring app from stdio to HTTP/streamable MCP transport
+      - key: SPRING_PROFILES_ACTIVE
+        value: http
+      # Render routes to PORT (default 10000); make Spring listen on the same port
+      - key: SERVER_PORT
+        value: "10000"
+      # Required secret — set in the Render dashboard (never committed)
+      - key: DISCORD_TOKEN
+        sync: false
