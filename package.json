@@ -1,0 +1,14 @@
+{
+  "name": "granola-notion-hosted-sync",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node worker.mjs",
+    "validate": "node worker.mjs --validate",
+    "test": "node --check worker.mjs && node test-worker.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

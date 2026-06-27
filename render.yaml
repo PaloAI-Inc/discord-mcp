@@ -1,0 +1,20 @@
+services:
+  - type: cron
+    name: granola-notion-hosted-sync
+    runtime: node
+    schedule: "*/30 * * * *"
+    buildCommand: "npm test"
+    startCommand: "node worker.mjs"
+    envVars:
+      - key: GRANOLA_API_KEY
+        sync: false
+      - key: NOTION_API_KEY
+        sync: false
+      - key: NOTION_DATABASE_ID
+        value: "385036feb31080499dfccabfe8c0b533"
+      - key: GRANOLA_FOLDER_NAME
+        value: "Palo meeting Series"
+      - key: SYNC_CREATED_AFTER
+        value: "2026-01-01T00:00:00Z"
+      - key: MEETING_TITLE_ALLOW_REGEX
+        value: "palo|team|product|roadmap|launch|practice|question|web|ios|fundraising|investor|growth|marketing|retention|onboarding|streak|vocab|dashboard"
