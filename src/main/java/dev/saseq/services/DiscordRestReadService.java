@@ -130,23 +130,34 @@ public class DiscordRestReadService {
             throw new IllegalStateException("Discord REST request interrupted", e);
         }
 
-        JsonNode body = parseJson(response.body());
         if (response.statusCode() == 429) {
+            JsonNode body = parseJson(response.body());
             String retry = body.path("retry_after").asText("unknown");
             throw new IllegalStateException("Discord REST rate limited; retry_after=" + retry);
         }
         if (response.statusCode() < 200 || response.statusCode() >= 300) {
             throw new IllegalStateException("Discord REST request failed: HTTP " + response.statusCode() + " " + response.body());
         }
-        return body;
+        return parseJson(response.body());
     }
 
     private JsonNode parseJson(String raw) {
         try {
             return objectMapper.readTree(raw == null || raw.isBlank() ? "{}" : raw);
         } catch (IOException e) {
-            throw new IllegalStateException("Discord REST returned invalid JSON", e);
+            throw new IllegalStateException(
+                    "Discord REST returned invalid JSON: " + preview(raw),
+                    e
+            );
         }
+    }
+
+    private String preview(String raw) {
+        if (raw == null) {
+            return "";
+        }
+        String normalized = raw.replaceAll("\\s+", " ").trim();
+        return normalized.length() <= 300 ? normalized : normalized.substring(0, 300);
     }
 
     private Map<String, String> channelNamesById(String guildId) {
