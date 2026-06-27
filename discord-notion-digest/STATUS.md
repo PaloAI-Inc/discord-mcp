@@ -36,6 +36,14 @@ Render dashboard:
 Until those are present, `run_render_cron.py` exits with
 `waiting_for_secrets` and does not publish anything.
 
+Verified current secret state:
+
+- Manual digest job `job-d8vjrrjsq97s738eell0` succeeded quickly, but no new
+  `Discord Digest` row appeared.
+- Env-presence probe job `job-d8vjsq8k1i2s73eqb7g0` failed with a command that
+  exits non-zero unless both `DISCORD_BOT_TOKEN` and `NOTION_TOKEN` are present.
+- Therefore at least one required Render secret is still missing.
+
 The old Codex automations were deleted:
 
 - `dolphin-discord-digest-hourly`
