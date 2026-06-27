@@ -9,7 +9,10 @@ services:
     startCommand: "python3 run_render_cron.py"
     envVars:
       - key: DISCORD_BOT_TOKEN
-        sync: false
+        fromService:
+          type: web
+          name: discord-mcp-prod
+          envVarKey: DISCORD_TOKEN
       - key: DISCORD_GUILD_ID
         value: "1390121727526305882"
       - key: DISCORD_CHANNEL_CONFIG_PATH

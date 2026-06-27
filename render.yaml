@@ -30,7 +30,10 @@ services:
     autoDeploy: true
     envVars:
       - key: DISCORD_BOT_TOKEN
-        sync: false
+        fromService:
+          type: web
+          name: discord-mcp-prod
+          envVarKey: DISCORD_TOKEN
       - key: NOTION_TOKEN
         sync: false
       - key: DISCORD_GUILD_ID

@@ -27,11 +27,12 @@ python3 -m unittest discover -s tests
 ## Current Blocker
 
 The production path no longer depends on Codex automations or the local laptop.
-The hosted Render cron is live and safe-idles until two secrets are added in the
-Render dashboard:
+The hosted Render cron is live and safe-idles until required secrets are
+available:
 
-- `DISCORD_BOT_TOKEN`
-- `NOTION_TOKEN`
+- `DISCORD_BOT_TOKEN` is wired from the existing `discord-mcp-prod`
+  `DISCORD_TOKEN` secret through Blueprint `fromService.envVarKey`.
+- `NOTION_TOKEN` still needs to be added in the Render dashboard.
 
 Until those are present, `run_render_cron.py` exits with
 `waiting_for_secrets` and does not publish anything.
@@ -42,7 +43,9 @@ Verified current secret state:
   `Discord Digest` row appeared.
 - Env-presence probe job `job-d8vjsq8k1i2s73eqb7g0` failed with a command that
   exits non-zero unless both `DISCORD_BOT_TOKEN` and `NOTION_TOKEN` are present.
-- Therefore at least one required Render secret is still missing.
+- Therefore at least one required Render secret is still missing. After the
+  Discord secret wiring deploy, the expected remaining manual secret is
+  `NOTION_TOKEN`.
 
 The old Codex automations were deleted:
 
@@ -55,8 +58,7 @@ The old Codex automations were deleted:
 Add the two secrets to the Render cron service:
 
 - Render service: `https://dashboard.render.com/cron/crn-d8vjofe8bjmc738ca9e0`
-- Environment variables:
-  - `DISCORD_BOT_TOKEN`
+- Environment variable:
   - `NOTION_TOKEN`
 
 Then trigger a manual run from Render. The cron runs hourly at minute 7 UTC.
