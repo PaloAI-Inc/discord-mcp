@@ -22,8 +22,9 @@ when the local `America/Los_Angeles` hour is `23`.
 
 Current verification:
 
-- Latest hosted deploy is live on commit `73295b5`.
-- A no-secret env probe job, `job-d8vjsq8k1i2s73eqb7g0`, failed because at
-  least one required secret is missing. After the Discord secret wiring deploy,
-  the remaining expected manual secret is `NOTION_TOKEN`.
+- Latest hosted deploy is live on commit `e7447be`.
+- Discord env probe `job-d8vk4nbtqb8s73esvilg` succeeded, confirming the cron
+  can read `DISCORD_BOT_TOKEN` from the existing `discord-mcp-prod` service.
+- Notion env probe `job-d8vk4n9o3t8c73bbur4g` failed, confirming the remaining
+  missing secret is `NOTION_TOKEN`.
 - No local Codex automation is active for this workflow.

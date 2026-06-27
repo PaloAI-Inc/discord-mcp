@@ -163,12 +163,12 @@ The cron runs `python3 run_render_cron.py` hourly. That entrypoint always runs
 the hourly digest and also runs the daily glance when the local
 `America/Los_Angeles` hour is `23`.
 
-The service is live but intentionally waits until these Render environment
-variables are added:
+The service is live. `DISCORD_BOT_TOKEN` is wired from the existing
+`discord-mcp-prod` service through the Render Blueprint, so the only manual
+environment variable still required on this cron is:
 
-- `DISCORD_BOT_TOKEN`
 - `NOTION_TOKEN`
 
-Until both are present, the cron exits with `waiting_for_secrets` and does not
+Until it is present, the cron exits with `waiting_for_secrets` and does not
 write to Notion. The Notion token must be an internal integration secret with
 access to the Dolphin Labs `Discord Digest` data source.

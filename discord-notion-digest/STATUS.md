@@ -39,12 +39,12 @@ Until those are present, `run_render_cron.py` exits with
 
 Verified current secret state:
 
-- Manual digest job `job-d8vjrrjsq97s738eell0` succeeded quickly, but no new
-  `Discord Digest` row appeared.
-- Env-presence probe job `job-d8vjsq8k1i2s73eqb7g0` failed with a command that
-  exits non-zero unless both `DISCORD_BOT_TOKEN` and `NOTION_TOKEN` are present.
-- Therefore at least one required Render secret is still missing. After the
-  Discord secret wiring deploy, the expected remaining manual secret is
+- Discord env probe `job-d8vk4nbtqb8s73esvilg` succeeded after deploy
+  `dep-d8vk4c68bjmc738cmhvg`, confirming `DISCORD_BOT_TOKEN` is available to
+  the cron through the existing `discord-mcp-prod` secret.
+- Notion env probe `job-d8vk4n9o3t8c73bbur4g` failed, confirming
+  `NOTION_TOKEN` is still missing from the cron environment.
+- Therefore the only remaining manual activation step is adding
   `NOTION_TOKEN`.
 
 The old Codex automations were deleted:
@@ -55,7 +55,7 @@ The old Codex automations were deleted:
 
 ## Activation Path
 
-Add the two secrets to the Render cron service:
+Add the Notion secret to the Render cron service:
 
 - Render service: `https://dashboard.render.com/cron/crn-d8vjofe8bjmc738ca9e0`
 - Environment variable:
