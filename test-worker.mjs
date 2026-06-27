@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 
-import { buildReadout, normalizeFolderName } from "./worker.mjs";
+import { buildNotionDuplicateFilter, buildReadout, normalizeFolderName } from "./worker.mjs";
 
 const note = {
   id: "not_test12345678",
@@ -55,5 +55,21 @@ assert.equal(
 );
 assert.equal(readout.granolaUrl, "https://notes.granola.ai/d/f3e45e0f-24cc-480b-9a6c-8b1f5e3d7a2c");
 assert.equal(normalizeFolderName(" Palo   meeting Series "), "palo meeting series");
+assert.deepEqual(buildNotionDuplicateFilter(readout), {
+  or: [
+    {
+      property: "Granola Meeting ID",
+      rich_text: {
+        equals: "f3e45e0f-24cc-480b-9a6c-8b1f5e3d7a2c",
+      },
+    },
+    {
+      property: "Granola",
+      url: {
+        equals: "https://notes.granola.ai/d/f3e45e0f-24cc-480b-9a6c-8b1f5e3d7a2c",
+      },
+    },
+  ],
+});
 
 console.log("worker parser fixture passed");

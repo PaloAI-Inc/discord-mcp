@@ -2,7 +2,7 @@
 
 This is a deploy-ready skeleton for moving the current laptop-bound sync into a cloud cron job.
 
-It polls Granola, filters for Palo/company meetings, checks the existing Notion database by `Granola Meeting ID`, and creates a readable Notion page with:
+It polls Granola, filters for Palo/company meetings, checks the existing Notion database by `Granola Meeting ID` or the Granola URL, and creates a readable Notion page with:
 
 - What changed
 - Decisions

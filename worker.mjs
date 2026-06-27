@@ -45,12 +45,12 @@ async function main() {
       continue;
     }
 
-    if (await notionPageExists(granolaKey)) {
+    const readout = buildReadout(note, granolaKey);
+
+    if (await notionPageExists(readout)) {
       skipped += 1;
       continue;
     }
-
-    const readout = buildReadout(note, granolaKey);
 
     if (DRY_RUN) {
       console.log(`[dry-run] would create: ${readout.title} (${granolaKey})`);
@@ -81,7 +81,7 @@ async function validateRuntimeAccess(candidates) {
   const granolaKey = granolaStableKey(note);
   if (!granolaKey) throw new Error("Granola note detail did not include a stable note key.");
 
-  await notionPageExists(granolaKey);
+  await notionPageExists(buildReadout(note, granolaKey));
   console.log("Granola note detail and Notion duplicate check: ok");
 }
 
@@ -346,14 +346,34 @@ function inferWhyItMatters(sections, summary) {
   return firstSentence(summary) || "This keeps absent teammates aligned on what changed and what needs follow-up.";
 }
 
-async function notionPageExists(granolaKey) {
-  const body = {
-    filter: {
+function buildNotionDuplicateFilter(readout) {
+  const filters = [];
+
+  if (readout.granolaKey) {
+    filters.push({
       property: "Granola Meeting ID",
       rich_text: {
-        equals: granolaKey,
+        equals: readout.granolaKey,
       },
-    },
+    });
+  }
+
+  if (readout.granolaUrl) {
+    filters.push({
+      property: "Granola",
+      url: {
+        equals: readout.granolaUrl,
+      },
+    });
+  }
+
+  if (!filters.length) throw new Error("Cannot build Notion duplicate filter without a Granola key or URL.");
+  return filters.length === 1 ? filters[0] : { or: filters };
+}
+
+async function notionPageExists(readout) {
+  const body = {
+    filter: buildNotionDuplicateFilter(readout),
     page_size: 1,
   };
   const result = await notionFetch(`/databases/${NOTION_DATABASE_ID}/query`, {
@@ -520,6 +540,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
 
 export {
   buildReadout,
+  buildNotionDuplicateFilter,
   parseMarkdownSections,
   extractSectionBullets,
   inferBullets,
