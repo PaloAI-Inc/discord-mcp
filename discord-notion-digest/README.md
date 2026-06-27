@@ -136,11 +136,8 @@ python3 discord_notion_digest.py \
   --dry-run
 ```
 
-For a Codex/Notion automation, keep the second command in `--dry-run` mode and
-let the Notion connector write only published, non-quiet digests into
-`collection://387036fe-b310-80e1-bb4a-000b910c600b`. That avoids exposing a
-Notion integration token to the local script. A standalone Render cron that
-writes directly to Notion still needs `NOTION_TOKEN` as a Render secret.
+For production, use the hosted Render cron below. The MCP collector remains as
+a local diagnostic path only.
 
 Suggested schedules:
 
@@ -152,38 +149,26 @@ overlapping scheduler window does not need persistent local disk state.
 
 ## Render
 
-The existing Dolphin Render service discovered for Discord is:
+The production hosted cron is:
 
-- Service: `discord-mcp-prod`
-- Service ID: `srv-d8rn5s6gvqtc73f97f90`
-- URL: <https://discord-mcp-prod.onrender.com>
-- MCP endpoint: <https://discord-mcp-prod.onrender.com/mcp>
+- Service: `dolphin-discord-notion-digest`
+- Service ID: `crn-d8vjofe8bjmc738ca9e0`
+- Dashboard: <https://dashboard.render.com/cron/crn-d8vjofe8bjmc738ca9e0>
+- Repo: <https://github.com/PaloAI-Inc/discord-mcp>
+- Path: `discord-notion-digest/`
+- Region: Ohio
+- Schedule: `7 * * * *` UTC
 
-Current operational caveat: `discord-mcp-prod` is HTTP/MCP healthy after commit
-`8057328`, and the deployed Docker image now defaults to
-`DISCORD_GATEWAY_ENABLED=false` so digest reads do not start the JDA gateway.
-Health returns `UP` and MCP `initialize` succeeds. Gateway tools intentionally
-return `Discord gateway is disabled; use REST-backed tools.`
+The cron runs `python3 run_render_cron.py` hourly. That entrypoint always runs
+the hourly digest and also runs the daily glance when the local
+`America/Los_Angeles` hour is `23`.
 
-REST-backed Discord read tools are deployed, but Discord currently returns
-Cloudflare `1015` to Render. The last gateway startup before REST-only mode
-logged `Retry-After: 57666 s` at `2026-06-27T02:37:30Z`; the REST-only startup
-did not show a new JDA Cloudflare hit. Do not activate hourly/daily Notion
-writes until `list_channels_rest` or `read_messages_rest` succeeds.
+The service is live but intentionally waits until these Render environment
+variables are added:
 
-Production activation needs either the Discord rate-limit window to clear on
-this Render IP/token path, a runtime/IP path that is not Cloudflare-rate-limited,
-or a direct Render cron that has valid `DISCORD_BOT_TOKEN` and `NOTION_TOKEN`
-secrets.
+- `DISCORD_BOT_TOKEN`
+- `NOTION_TOKEN`
 
-Use a cron job with:
-
-```bash
-python3 discord_notion_digest.py --cadence Hourly
-```
-
-and a second daily cron job with:
-
-```bash
-python3 discord_notion_digest.py --cadence Daily
-```
+Until both are present, the cron exits with `waiting_for_secrets` and does not
+write to Notion. The Notion token must be an internal integration secret with
+access to the Dolphin Labs `Discord Digest` data source.
