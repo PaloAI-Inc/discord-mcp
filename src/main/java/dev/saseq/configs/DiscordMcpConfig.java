@@ -24,6 +24,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 @Configuration
 public class DiscordMcpConfig {
     @Bean
@@ -67,8 +74,51 @@ public class DiscordMcpConfig {
             System.err.println("ERROR: The environment variable DISCORD_TOKEN is not set. Please set it to run the application properly.");
             System.exit(1);
         }
-        return JDABuilder.createDefault(token)
-                .enableIntents(GatewayIntent.GUILD_MEMBERS, GatewayIntent.GUILD_VOICE_STATES, GatewayIntent.SCHEDULED_EVENTS)
-                .build();
+        return (JDA) Proxy.newProxyInstance(
+                JDA.class.getClassLoader(),
+                new Class<?>[]{JDA.class},
+                new LazyJdaInvocationHandler(token)
+        );
+    }
+
+    private static final class LazyJdaInvocationHandler implements InvocationHandler {
+        private final CompletableFuture<JDA> jdaFuture;
+        private volatile JDA readyJda;
+
+        LazyJdaInvocationHandler(String token) {
+            ExecutorService executor = Executors.newSingleThreadExecutor(runnable -> {
+                Thread thread = new Thread(runnable, "discord-jda-connect");
+                thread.setDaemon(false);
+                return thread;
+            });
+            this.jdaFuture = CompletableFuture.supplyAsync(() -> {
+                try {
+                    return JDABuilder.createDefault(token)
+                            .enableIntents(GatewayIntent.GUILD_MEMBERS, GatewayIntent.GUILD_VOICE_STATES, GatewayIntent.SCHEDULED_EVENTS)
+                            .build()
+                            .awaitReady();
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    throw new IllegalStateException("Discord client startup was interrupted", e);
+                }
+            }, executor);
+        }
+
+        @Override
+        public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+            if (method.getDeclaringClass() == Object.class) {
+                return method.invoke(this, args);
+            }
+
+            JDA jda = readyJda;
+            if (jda == null) {
+                if (!jdaFuture.isDone()) {
+                    throw new IllegalStateException("Discord client is still connecting; retry shortly.");
+                }
+                jda = jdaFuture.get();
+                readyJda = jda;
+            }
+            return method.invoke(jda, args);
+        }
     }
 }
