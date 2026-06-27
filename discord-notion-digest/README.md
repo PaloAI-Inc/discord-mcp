@@ -164,11 +164,10 @@ the hourly digest and also runs the daily glance when the local
 `America/Los_Angeles` hour is `23`.
 
 The service is live. `DISCORD_BOT_TOKEN` is wired from the existing
-`discord-mcp-prod` service through the Render Blueprint, so the only manual
-environment variable still required on this cron is:
+`discord-mcp-prod` service through the Render Blueprint, and `NOTION_TOKEN` is
+set on the cron from the Dolphin Labs Notion internal integration
+`Granola Notion Hosted Sync`.
 
-- `NOTION_TOKEN`
-
-Until it is present, the cron exits with `waiting_for_secrets` and does not
-write to Notion. The Notion token must be an internal integration secret with
-access to the Dolphin Labs `Discord Digest` data source.
+Activation was verified by manual Render run at 2026-06-27 05:21 UTC. The run
+created `Discord Digest - 2026-06-26 05:00 UTC` in Notion with status
+`Published` and signal count `5`.

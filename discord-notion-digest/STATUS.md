@@ -24,28 +24,28 @@ python3 discord_notion_digest.py --validate-config
 python3 -m unittest discover -s tests
 ```
 
-## Current Blocker
+## Current State
 
 The production path no longer depends on Codex automations or the local laptop.
-The hosted Render cron is live and safe-idles until required secrets are
-available:
+The hosted Render cron is live and publishing to Notion:
 
 - `DISCORD_BOT_TOKEN` is wired from the existing `discord-mcp-prod`
   `DISCORD_TOKEN` secret through Blueprint `fromService.envVarKey`.
-- `NOTION_TOKEN` still needs to be added in the Render dashboard.
+- `NOTION_TOKEN` is set on the Render cron from the Dolphin Labs Notion
+  internal integration `Granola Notion Hosted Sync`.
+- The Notion integration has access to the `Discord Digest` data source.
 
-Until those are present, `run_render_cron.py` exits with
-`waiting_for_secrets` and does not publish anything.
-
-Verified current secret state:
+Verified current live state:
 
 - Discord env probe `job-d8vk4nbtqb8s73esvilg` succeeded after deploy
   `dep-d8vk4c68bjmc738cmhvg`, confirming `DISCORD_BOT_TOKEN` is available to
   the cron through the existing `discord-mcp-prod` secret.
-- Notion env probe `job-d8vk4n9o3t8c73bbur4g` failed, confirming
-  `NOTION_TOKEN` is still missing from the cron environment.
-- Therefore the only remaining manual activation step is adding
-  `NOTION_TOKEN`.
+- Corrected env deploy `dep-d8vlqu68bjmc738eev60` is live.
+- Manual run at 2026-06-27 05:21 UTC completed successfully with
+  `finished_digest` return code `0`.
+- The run created Notion row `Discord Digest - 2026-06-26 05:00 UTC`
+  (`38c036fe-b310-818d-8b55-da1540453903`) with status `Published` and
+  signal count `5`.
 
 The old Codex automations were deleted:
 
@@ -53,17 +53,15 @@ The old Codex automations were deleted:
 - `dolphin-discord-digest-daily-glance`
 - `retry-dolphin-discord-mcp-readiness`
 
-## Activation Path
+## Operations
 
-Add the Notion secret to the Render cron service:
+Render service:
 
-- Render service: `https://dashboard.render.com/cron/crn-d8vjofe8bjmc738ca9e0`
-- Environment variable:
-  - `NOTION_TOKEN`
+- `https://dashboard.render.com/cron/crn-d8vjofe8bjmc738ca9e0`
 
-Then trigger a manual run from Render. The cron runs hourly at minute 7 UTC.
-The entrypoint always runs the hourly digest and also runs the daily digest when
-the local `America/Los_Angeles` hour is `23`.
+The cron runs hourly at minute 7 UTC. The entrypoint always runs the hourly
+digest and also runs the daily digest when the local `America/Los_Angeles` hour
+is `23`.
 
-The direct script writes to Notion using the Notion API, so it needs an actual
-Notion integration secret with access to the `Discord Digest` data source.
+Quiet hourly runs do not create filler rows when no meaningful Discord signal
+is found.
