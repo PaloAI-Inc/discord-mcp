@@ -15,6 +15,7 @@ COPY --from=build /app/target/*.jar app.jar
 
 ENV DISCORD_TOKEN=""
 ENV DISCORD_GUILD_ID=""
+ENV DISCORD_GATEWAY_ENABLED="false"
 
 EXPOSE 8085
 

@@ -72,7 +72,8 @@ public class DiscordMcpConfig {
     }
 
     @Bean
-    public JDA jda(@Value("${DISCORD_TOKEN:}") String token) {
+    public JDA jda(@Value("${DISCORD_TOKEN:}") String token,
+                   @Value("${DISCORD_GATEWAY_ENABLED:true}") boolean gatewayEnabled) {
         if (token == null || token.isEmpty()) {
             System.err.println("ERROR: The environment variable DISCORD_TOKEN is not set. Please set it to run the application properly.");
             System.exit(1);
@@ -80,7 +81,7 @@ public class DiscordMcpConfig {
         return (JDA) Proxy.newProxyInstance(
                 JDA.class.getClassLoader(),
                 new Class<?>[]{JDA.class},
-                new LazyJdaInvocationHandler(token)
+                new LazyJdaInvocationHandler(token, gatewayEnabled)
         );
     }
 
@@ -88,7 +89,11 @@ public class DiscordMcpConfig {
         private final CompletableFuture<JDA> jdaFuture;
         private volatile JDA readyJda;
 
-        LazyJdaInvocationHandler(String token) {
+        LazyJdaInvocationHandler(String token, boolean gatewayEnabled) {
+            if (!gatewayEnabled) {
+                this.jdaFuture = null;
+                return;
+            }
             ExecutorService executor = Executors.newSingleThreadExecutor(runnable -> {
                 Thread thread = new Thread(runnable, "discord-jda-connect");
                 thread.setDaemon(false);
@@ -113,6 +118,9 @@ public class DiscordMcpConfig {
                 return method.invoke(this, args);
             }
 
+            if (jdaFuture == null) {
+                throw new IllegalStateException("Discord gateway is disabled; use REST-backed tools.");
+            }
             JDA jda = readyJda;
             if (jda == null) {
                 if (!jdaFuture.isDone()) {
