@@ -1,0 +1,23 @@
+{
+  "channels": [
+    {
+      "id": "111111111111111111",
+      "name": "dev-chat",
+      "area": "Dev",
+      "include_threads": true
+    },
+    {
+      "id": "222222222222222222",
+      "name": "advertisement",
+      "area": "Marketing",
+      "include_threads": true
+    },
+    {
+      "id": "333333333333333333",
+      "name": "business",
+      "area": "Business",
+      "include_threads": true,
+      "read_parent": true
+    }
+  ]
+}

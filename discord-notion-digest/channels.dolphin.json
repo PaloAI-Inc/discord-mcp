@@ -1,0 +1,55 @@
+{
+  "guild_id": "1390121727526305882",
+  "guild_name": "dolphin - sat/act prep",
+  "channels": [
+    {
+      "id": "1391633253022306474",
+      "name": "dev-chat",
+      "area": "Dev",
+      "include_threads": true
+    },
+    {
+      "id": "1519918721861423254",
+      "name": "intercom-updates",
+      "area": "Business",
+      "include_threads": true
+    },
+    {
+      "id": "1390154229309767780",
+      "name": "general",
+      "area": "Business",
+      "include_threads": true
+    },
+    {
+      "id": "1402214552569122866",
+      "name": "ask-for-help",
+      "area": "Business",
+      "include_threads": true
+    },
+    {
+      "id": "1456000340150321182",
+      "name": "math-and-science",
+      "area": "Business",
+      "include_threads": true
+    },
+    {
+      "id": "1455758572075094056",
+      "name": "success",
+      "area": "Business",
+      "include_threads": true
+    },
+    {
+      "id": "1456002452426850468",
+      "name": "college-app-help",
+      "area": "Business",
+      "include_threads": true
+    },
+    {
+      "id": "1456002500707487845",
+      "name": "chance-me",
+      "area": "Business",
+      "include_threads": true,
+      "read_parent": false
+    }
+  ]
+}

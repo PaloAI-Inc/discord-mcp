@@ -1,0 +1,38 @@
+services:
+  - type: cron
+    name: dolphin-discord-notion-digest
+    runtime: python
+    region: ohio
+    plan: starter
+    schedule: "7 * * * *"
+    buildCommand: "python3 -m py_compile discord_notion_digest.py run_render_cron.py tests/test_digest.py && python3 -m unittest discover -s tests"
+    startCommand: "python3 run_render_cron.py"
+    envVars:
+      - key: DISCORD_BOT_TOKEN
+        sync: false
+      - key: DISCORD_GUILD_ID
+        value: "1390121727526305882"
+      - key: DISCORD_CHANNEL_CONFIG_PATH
+        value: "channels.dolphin.json"
+      - key: NOTION_TOKEN
+        sync: false
+      - key: NOTION_DATA_SOURCE_ID
+        value: "387036fe-b310-80e1-bb4a-000b910c600b"
+      - key: NOTION_VERSION
+        value: "2025-09-03"
+      - key: INCLUDE_ACTIVE_THREADS
+        value: "true"
+      - key: IGNORE_BOTS
+        value: "true"
+      - key: WRITE_QUIET_RUNS
+        value: "false"
+      - key: LOOKBACK_MINUTES_HOURLY
+        value: "75"
+      - key: LOOKBACK_HOURS_DAILY
+        value: "24"
+      - key: REPORT_TIMEZONE
+        value: "America/Los_Angeles"
+      - key: DAILY_REPORT_HOUR_LOCAL
+        value: "23"
+      - key: RUN_SOURCE_BASE
+        value: "discord-notion-digest-render"
